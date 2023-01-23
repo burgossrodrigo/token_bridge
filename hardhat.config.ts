@@ -7,11 +7,11 @@ module.exports = {
     },
     goerli: {
       url: "https://eth-goerli.g.alchemy.com/v2/X_71lyvSJ09ASLV4smEvvVs2ZY-vSJ5h",
-      accounts: ['dbd5b8aa5d82ca0b7542134bc047dc635d230a6e6a463da9e48dfa792e0b720e']
+      accounts: ['PRIVATE_KEY']
     },
     mumbai: {
       url: "https://polygon-mumbai.g.alchemy.com/v2/nRYjkKqGYBrDLnjYwpLsaO4lRgcvJDKy",
-      accounts: ['dbd5b8aa5d82ca0b7542134bc047dc635d230a6e6a463da9e48dfa792e0b720e']
+      accounts: ['PRIVATE_KEY']
     }    
   },
   solidity: {
