@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct TokenConfig {
-    pub admin: Pubkey,
+    pub mint: Pubkey,
     pub bridgeable: bool,
     pub bump: u8,
 }
