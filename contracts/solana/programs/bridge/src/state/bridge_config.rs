@@ -1,3 +1,5 @@
+use anchor_lang::prelude::*;
+
 #[account]
 pub struct BridgeConfig {
     pub authority: Pubkey,
@@ -6,5 +8,5 @@ pub struct BridgeConfig {
 }
 
 impl BridgeConfig {
-    pub const LEN: uzise = 8 + 32 + 1 + 1;
+    pub const LEN: usize = 8 + 32 + 1 + 1;
 }
