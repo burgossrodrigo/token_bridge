@@ -22,6 +22,7 @@ pub struct RemoveToken<'info> {
     )]
     pub token_config: Account<'info, TokenConfig>,
 
+    /// CHECK: only register the pubkey from new admin, without read from the account
     pub mint: AccountInfo<'info>,
 
     pub authority: Signer<'info>,

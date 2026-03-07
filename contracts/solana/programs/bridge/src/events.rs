@@ -12,6 +12,7 @@ pub struct TokenReceived {
     pub from: Pubkey,
     pub mint: Pubkey,
     pub amount: u64,
+    pub to: Pubkey,
 }
 
 #[event]
