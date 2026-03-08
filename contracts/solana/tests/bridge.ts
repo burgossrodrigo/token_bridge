@@ -19,11 +19,11 @@ describe("bridge", () => {
 
   const program = anchor.workspace.Bridge as Program<Bridge>;
 
-  // payer/authority é a wallet configurada no provider (id.json local)
+  // payer/authority is the wallet configured in the provider (local id.json)
   const payer = (provider.wallet as any).payer as Keypair;
   const authorityPk = provider.wallet.publicKey;
 
-  // PDAs — derivados uma vez no before()
+  // PDAs — derived once in before()
   let bridgeConfigPda: PublicKey;
   let tokenConfigPda: PublicKey;
   let adminConfigPda: PublicKey;
@@ -32,7 +32,7 @@ describe("bridge", () => {
   let mint: PublicKey;
   let userTokenAccount: PublicKey;
 
-  // Admin secundário
+  // Secondary admin
   const newAdmin = Keypair.generate();
 
   before(async () => {
@@ -44,7 +44,7 @@ describe("bridge", () => {
 
   // ─── initialize ───────────────────────────────────────────────────────────
 
-  it("initialize — cria BridgeConfig com bridge_on = true", async () => {
+  it("initialize — creates BridgeConfig with bridge_on = true", async () => {
     await program.methods
       .initialize()
       .accounts({
@@ -60,20 +60,20 @@ describe("bridge", () => {
   });
 
   // ─── setup mint ───────────────────────────────────────────────────────────
-  // Cria o SPL Mint, minta tokens pro usuário e depois transfere
-  // a mint_authority para o bridge PDA — simula o deploy de um BridgeToken.
+  // Creates the SPL Mint, mints tokens to the user, then transfers
+  // mint_authority to the bridge PDA — simulates deploying a BridgeToken.
 
-  it("setup: cria mint e transfere authority para o bridge PDA", async () => {
-    // Cria mint com authority temporária (payer)
+  it("setup: creates mint and transfers authority to bridge PDA", async () => {
+    // Create mint with temporary authority (payer)
     mint = await createMint(
       provider.connection,
       payer,
-      authorityPk, // mint authority temporária
+      authorityPk, // temporary mint authority
       null,        // freeze authority
-      6            // decimais
+      6            // decimals
     );
 
-    // Cria token account para o usuário (authority)
+    // Create token account for the user (authority)
     userTokenAccount = await createAccount(
       provider.connection,
       payer,
@@ -81,7 +81,7 @@ describe("bridge", () => {
       authorityPk
     );
 
-    // Minta 1 token (1_000_000 com 6 decimais) enquanto temos authority
+    // Mint 1 token (1_000_000 with 6 decimals) while we still have authority
     await mintTo(
       provider.connection,
       payer,
@@ -91,7 +91,7 @@ describe("bridge", () => {
       1_000_000
     );
 
-    // Passa a mint_authority para o bridge PDA
+    // Transfer mint_authority to bridge PDA
     await setAuthority(
       provider.connection,
       payer,
@@ -101,7 +101,7 @@ describe("bridge", () => {
       bridgeConfigPda
     );
 
-    // Deriva o tokenConfig PDA agora que temos o mint
+    // Derive tokenConfig PDA now that we have the mint
     [tokenConfigPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("token"), mint.toBuffer()],
       program.programId
@@ -113,7 +113,7 @@ describe("bridge", () => {
 
   // ─── add_token ────────────────────────────────────────────────────────────
 
-  it("add_token — registra mint como bridgeável", async () => {
+  it("add_token — registers mint as bridgeable", async () => {
     await program.methods
       .addToken()
       .accounts({
@@ -132,7 +132,7 @@ describe("bridge", () => {
 
   // ─── set_admin ────────────────────────────────────────────────────────────
 
-  it("set_admin — cria AdminConfig para novo admin", async () => {
+  it("set_admin — creates AdminConfig for new admin", async () => {
     [adminConfigPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("admin"), newAdmin.publicKey.toBuffer()],
       program.programId
@@ -156,7 +156,7 @@ describe("bridge", () => {
 
   // ─── bridge_send ──────────────────────────────────────────────────────────
 
-  it("bridge_send — queima 500_000 tokens do usuário", async () => {
+  it("bridge_send — burns 500_000 tokens from user", async () => {
     const before = (await getAccount(provider.connection, userTokenAccount)).amount;
     const destinationOnOtherChain = Keypair.generate().publicKey;
 
@@ -178,7 +178,7 @@ describe("bridge", () => {
 
   // ─── bridge_receive ───────────────────────────────────────────────────────
 
-  it("bridge_receive via authority — minta 200_000 tokens", async () => {
+  it("bridge_receive via authority — mints 200_000 tokens", async () => {
     const before = (await getAccount(provider.connection, userTokenAccount)).amount;
     const originOnOtherChain = Keypair.generate().publicKey;
 
@@ -190,7 +190,7 @@ describe("bridge", () => {
         mint,
         tokenAccount: userTokenAccount,
         admin: authorityPk,
-        adminConfig: null, // authority não precisa de adminConfig
+        adminConfig: null, // authority does not need adminConfig
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();
@@ -199,7 +199,7 @@ describe("bridge", () => {
     assert.equal(after - before, BigInt(200_000));
   });
 
-  it("bridge_receive via admin — minta 100_000 tokens", async () => {
+  it("bridge_receive via admin — mints 100_000 tokens", async () => {
     const before = (await getAccount(provider.connection, userTokenAccount)).amount;
     const originOnOtherChain = Keypair.generate().publicKey;
 
@@ -214,16 +214,16 @@ describe("bridge", () => {
         adminConfig: adminConfigPda,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([newAdmin]) // newAdmin precisa assinar pois não é o provider wallet
+      .signers([newAdmin]) // newAdmin must sign since it is not the provider wallet
       .rpc();
 
     const after = (await getAccount(provider.connection, userTokenAccount)).amount;
     assert.equal(after - before, BigInt(100_000));
   });
 
-  it("bridge_receive — rejeita carteira não autorizada", async () => {
+  it("bridge_receive — rejects unauthorized wallet", async () => {
     const rogue = Keypair.generate();
-    // Airdrop mínimo para pagar a tx fee
+    // Airdrop minimum SOL to cover tx fee
     const sig = await provider.connection.requestAirdrop(rogue.publicKey, 1e9);
     await provider.connection.confirmTransaction(sig);
 
@@ -241,7 +241,7 @@ describe("bridge", () => {
         })
         .signers([rogue])
         .rpc();
-      assert.fail("Deveria ter rejeitado");
+      assert.fail("Should have been rejected");
     } catch (e: any) {
       assert.include(e.message, "Unauthorized");
     }
@@ -249,7 +249,7 @@ describe("bridge", () => {
 
   // ─── set_bridge_status ────────────────────────────────────────────────────
 
-  it("set_bridge_status false — desliga a ponte", async () => {
+  it("set_bridge_status false — disables the bridge", async () => {
     await program.methods
       .setBridgeStatus(false)
       .accounts({
@@ -262,7 +262,7 @@ describe("bridge", () => {
     assert.isFalse(config.bridgeOn);
   });
 
-  it("bridge_send — rejeita quando ponte está desligada", async () => {
+  it("bridge_send — rejects when bridge is disabled", async () => {
     try {
       await program.methods
         .bridgeSend(new BN(100_000), Keypair.generate().publicKey)
@@ -275,13 +275,13 @@ describe("bridge", () => {
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
-      assert.fail("Deveria ter rejeitado");
+      assert.fail("Should have been rejected");
     } catch (e: any) {
       assert.include(e.message, "BridgeDisabled");
     }
   });
 
-  it("set_bridge_status true — religa a ponte", async () => {
+  it("set_bridge_status true — re-enables the bridge", async () => {
     await program.methods
       .setBridgeStatus(true)
       .accounts({
@@ -296,7 +296,7 @@ describe("bridge", () => {
 
   // ─── remove_token ─────────────────────────────────────────────────────────
 
-  it("remove_token — marca token como não bridgeável", async () => {
+  it("remove_token — marks token as not bridgeable", async () => {
     await program.methods
       .removeToken()
       .accounts({
@@ -313,7 +313,7 @@ describe("bridge", () => {
 
   // ─── remove_admin ─────────────────────────────────────────────────────────
 
-  it("remove_admin — desativa admin", async () => {
+  it("remove_admin — deactivates admin", async () => {
     await program.methods
       .removeAdmin()
       .accounts({

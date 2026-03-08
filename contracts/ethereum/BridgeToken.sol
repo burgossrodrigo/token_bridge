@@ -5,12 +5,18 @@ import "./extension/Admin.sol";
 
 contract BridgeToken is Admin {
 
-    constructor() public {
-        _name = "Bridge Token";
-        _symbol = "BRDGTK";
-        _decimals = 18;
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_,
+        uint maxSupply_
+    ) public {
+        _name = name_;
+        _symbol = symbol_;
+        _decimals = decimals_;
+        _maxSupply = maxSupply_;
         _owner = msg.sender;
-        admin[msg.sender] = true;        
+        admin[msg.sender] = true;
     }
 
     mapping(address => uint256) public balanceOf;
