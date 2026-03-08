@@ -2,9 +2,13 @@ name: Integration Tests
 
 on:
   push:
-    branches: [main, feat/solana]
+    branches-ignore:
+      - main
+      - dev
   pull_request:
-    branches: [main]
+    branches-ignore:
+      - main
+      - dev
 
 jobs:
   # ── Ethereum ────────────────────────────────────────────────────────────────
