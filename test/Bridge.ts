@@ -76,7 +76,11 @@ describe("Bridge integration", function () {
     });
 
     it("bridgeSent emits TokenSent", async function () {
-      const destination = ethers.Wallet.createRandom().address;
+      // bridgeSent expects bytes32 — pad a random address to 32 bytes
+      const destination = ethers.utils.hexZeroPad(
+        ethers.Wallet.createRandom().address,
+        32
+      );
 
       const tx = await bridge
         .connect(user)
