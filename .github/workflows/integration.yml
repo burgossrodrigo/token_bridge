@@ -94,6 +94,10 @@ jobs:
         working-directory: contracts/solana
         run: cargo update -p blake3 --precise 1.8.2
 
+      - name: Fix indexmap compatibility (bundled rustc 1.79)
+        working-directory: contracts/solana
+        run: cargo update -p indexmap --precise 2.11.4
+
       - name: Build and test
         working-directory: contracts/solana
         run: anchor test
