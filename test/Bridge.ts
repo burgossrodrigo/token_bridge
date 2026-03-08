@@ -25,6 +25,9 @@ describe("Bridge integration", function () {
     const Factory = await ethers.getContractFactory("BridgeTokenFactory");
     factory = await Factory.deploy(bridge.address);
     await factory.deployed();
+
+    // Factory needs to be admin on Bridge so it can call addToken
+    await bridge.setAdmin(factory.address);
   });
 
   // ─── factory ──────────────────────────────────────────────────────────────
@@ -89,7 +92,8 @@ describe("Bridge integration", function () {
 
       const event = receipt.events?.find((e: any) => e.event === "TokenSent");
       expect(event, "TokenSent event missing").to.not.be.undefined;
-      expect(event.args[0]).to.equal(destination); // to
+      // bytes32 events come back lowercase; normalize before comparing
+      expect(event.args[0].toLowerCase()).to.equal(destination.toLowerCase()); // to
       expect(event.args[1]).to.equal(token.address); // token
       expect(event.args[2]).to.equal(MINT_AMOUNT); // amount
     });
@@ -122,14 +126,15 @@ describe("Bridge integration", function () {
         factory
           .connect(user)
           .deployToken("Bad Token", "BAD", 18, MAX_SUPPLY)
-      ).to.be.reverted;
+      ).to.be.revertedWith("You don't have permission to access this function");
     });
 
     it("bridgeSent reverts for unregistered token", async function () {
       const randomToken = ethers.Wallet.createRandom().address;
+      const destination = ethers.utils.hexZeroPad(user.address, 32);
       await expect(
-        bridge.connect(user).bridgeSent(randomToken, 1, user.address)
-      ).to.be.reverted;
+        bridge.connect(user).bridgeSent(randomToken, 1, destination)
+      ).to.be.revertedWith("Token isn't bridgeable");
     });
   });
 });

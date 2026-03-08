@@ -1,4 +1,5 @@
 import "@nomiclabs/hardhat-ethers";
+import "@nomicfoundation/hardhat-chai-matchers";
 
 module.exports = {
   defaultNetwork: "hardhat",
