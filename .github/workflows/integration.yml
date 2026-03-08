@@ -21,12 +21,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "npm"
-          cache-dependency-path: package-lock.json
+          node-version: "22"
 
       - name: Install dependencies
-        run: npm install
+        run: rm -f package-lock.json && npm install
 
       - name: Compile contracts
         run: npx hardhat compile
@@ -84,7 +82,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "22"
           cache: "yarn"
           cache-dependency-path: contracts/solana/yarn.lock
 
