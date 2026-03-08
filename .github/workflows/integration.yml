@@ -1,0 +1,97 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main, feat/solana]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Ethereum ────────────────────────────────────────────────────────────────
+  ethereum:
+    name: Ethereum (Hardhat)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      - name: Run integration tests
+        run: npx hardhat test --network hardhat
+
+  # ── Solana ──────────────────────────────────────────────────────────────────
+  solana:
+    name: Solana (Anchor)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/solana/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.92.0"
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v2.1.0/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Generate local keypair
+        run: solana-keygen new --outfile ~/.config/solana/id.json --no-bip39-passphrase
+
+      - name: Cache Anchor binary
+        id: cache-anchor
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/anchor
+          key: ${{ runner.os }}-anchor-0.31.1
+
+      - name: Install Anchor
+        if: steps.cache-anchor.outputs.cache-hit != 'true'
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          avm install 0.31.1
+          avm use 0.31.1
+
+      - name: Add Anchor to PATH
+        run: echo "$HOME/.avm/bin" >> $GITHUB_PATH
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "yarn"
+          cache-dependency-path: contracts/solana/yarn.lock
+
+      - name: Install JS dependencies
+        working-directory: contracts/solana
+        run: yarn install
+
+      - name: Fix blake3 compatibility
+        working-directory: contracts/solana
+        run: cargo update -p blake3 --precise 1.8.2
+
+      - name: Build and test
+        working-directory: contracts/solana
+        run: anchor test

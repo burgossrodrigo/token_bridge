@@ -176,7 +176,63 @@ describe("bridge", () => {
     assert.equal(before - after, BigInt(500_000));
   });
 
+  it("bridge_send — emits TokenSent event with correct fields", async () => {
+    const destinationOnOtherChain = Keypair.generate().publicKey;
+
+    const eventPromise = new Promise<any>((resolve) => {
+      const listenerId = program.addEventListener("TokenSent", (event) => {
+        program.removeEventListener(listenerId);
+        resolve(event);
+      });
+    });
+
+    await program.methods
+      .bridgeSend(new BN(100_000), destinationOnOtherChain)
+      .accounts({
+        bridgeConfig: bridgeConfigPda,
+        tokenConfig: tokenConfigPda,
+        mint,
+        tokenAccount: userTokenAccount,
+        user: authorityPk,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    const event = await eventPromise;
+    assert.ok(event.mint.equals(mint), "event.mint mismatch");
+    assert.equal(event.amount.toNumber(), 100_000, "event.amount mismatch");
+    assert.ok(event.to.equals(destinationOnOtherChain), "event.to mismatch");
+  });
+
   // ─── bridge_receive ───────────────────────────────────────────────────────
+
+  it("bridge_receive via authority — emits TokenReceived event", async () => {
+    const originOnOtherChain = Keypair.generate().publicKey;
+
+    const eventPromise = new Promise<any>((resolve) => {
+      const listenerId = program.addEventListener("TokenReceived", (event) => {
+        program.removeEventListener(listenerId);
+        resolve(event);
+      });
+    });
+
+    await program.methods
+      .bridgeReceive(new BN(50_000), originOnOtherChain)
+      .accounts({
+        bridgeConfig: bridgeConfigPda,
+        tokenConfig: tokenConfigPda,
+        mint,
+        tokenAccount: userTokenAccount,
+        admin: authorityPk,
+        adminConfig: null,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    const event = await eventPromise;
+    assert.ok(event.mint.equals(mint), "event.mint mismatch");
+    assert.equal(event.amount.toNumber(), 50_000, "event.amount mismatch");
+  });
 
   it("bridge_receive via authority — mints 200_000 tokens", async () => {
     const before = (await getAccount(provider.connection, userTokenAccount)).amount;
