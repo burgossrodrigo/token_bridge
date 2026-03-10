@@ -23,13 +23,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
     --default-toolchain ${RUST_VERSION} -y --no-modify-path
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Solana CLI + keypair
-RUN sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)" \
-    && echo "=== PATH ===" && echo "$PATH" \
-    && echo "=== solana bins ===" && find /root/.local/share/solana -name "solana-keygen" 2>/dev/null || true \
-    && find /root -name "solana-keygen" 2>/dev/null || true \
-    && /root/.local/share/solana/install/active_release/bin/solana-keygen new \
-       --outfile /root/.config/solana/id.json --no-bip39-passphrase
+# Solana CLI
+RUN sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
 ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
 
 # Anchor via avm
