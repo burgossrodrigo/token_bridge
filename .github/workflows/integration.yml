@@ -85,3 +85,5 @@ jobs:
         run: |
           echo "=== test-ledger-log.txt ===" && cat .anchor/test-ledger/test-ledger-log.txt 2>/dev/null || true
           echo "=== validator.log (last 100 lines) ===" && tail -100 .anchor/test-ledger/validator.log 2>/dev/null || true
+          echo "=== which solana-test-validator ===" && which solana-test-validator 2>/dev/null || echo "not found"
+          echo "=== solana-test-validator --version ===" && solana-test-validator --version 2>/dev/null || echo "failed"
