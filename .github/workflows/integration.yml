@@ -57,6 +57,9 @@ jobs:
         working-directory: contracts/solana
         run: yarn install
 
+      - name: Generate throwaway keypair
+        run: solana-keygen new --outfile /root/.config/solana/id.json --no-bip39-passphrase --force
+
       - name: Fix blake3 compatibility
         working-directory: contracts/solana
         run: cargo update -p blake3 --precise 1.8.2
