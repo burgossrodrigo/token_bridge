@@ -35,6 +35,18 @@ describe("bridge", () => {
   // Secondary admin
   const newAdmin = Keypair.generate();
 
+  async function getConfirmedTx(sig: string) {
+    for (let i = 0; i < 10; i++) {
+      const tx = await provider.connection.getTransaction(sig, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      });
+      if (tx) return tx;
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    throw new Error(`Transaction ${sig} not found after retries`);
+  }
+
   before(async () => {
     [bridgeConfigPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("bridge")],
@@ -192,10 +204,7 @@ describe("bridge", () => {
       })
       .rpc();
 
-    const tx = await provider.connection.getTransaction(sig, {
-      commitment: "confirmed",
-      maxSupportedTransactionVersion: 0,
-    });
+    const tx = await getConfirmedTx(sig);
     const events: any[] = [];
     parser.parseLogs(tx.meta.logMessages, (e) => events.push(e));
     const event = events.find((e) => e.name === "TokenSent")?.data;
@@ -225,10 +234,7 @@ describe("bridge", () => {
       })
       .rpc();
 
-    const tx = await provider.connection.getTransaction(sig, {
-      commitment: "confirmed",
-      maxSupportedTransactionVersion: 0,
-    });
+    const tx = await getConfirmedTx(sig);
     const events: any[] = [];
     parser.parseLogs(tx.meta.logMessages, (e) => events.push(e));
     const event = events.find((e) => e.name === "TokenReceived")?.data;
