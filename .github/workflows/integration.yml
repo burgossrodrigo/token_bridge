@@ -78,3 +78,8 @@ jobs:
       - name: Build and test
         working-directory: contracts/solana
         run: anchor test
+
+      - name: Print validator log on failure
+        if: failure()
+        working-directory: contracts/solana
+        run: cat .anchor/test-ledger/test-ledger-log.txt 2>/dev/null || echo "log not found"
