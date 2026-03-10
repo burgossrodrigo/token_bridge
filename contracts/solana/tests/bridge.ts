@@ -204,7 +204,6 @@ describe("bridge", () => {
 
   it("bridge_send — emits TokenSent event with correct fields", async () => {
     const destinationOnOtherChain = Keypair.generate().publicKey;
-    const parser = new EventParser(program.programId, program.coder);
 
     const sig = await program.methods
       .bridgeSend(new BN(100_000), destinationOnOtherChain)
@@ -233,7 +232,6 @@ describe("bridge", () => {
 
   it("bridge_receive via authority — emits TokenReceived event", async () => {
     const originOnOtherChain = Keypair.generate().publicKey;
-    const parser = new EventParser(program.programId, program.coder);
 
     const sig = await program.methods
       .bridgeReceive(new BN(50_000), originOnOtherChain)
