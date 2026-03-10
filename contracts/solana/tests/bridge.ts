@@ -1,5 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
-import { BN, Program } from "@coral-xyz/anchor";
+import { BN, BorshCoder, Program } from "@coral-xyz/anchor";
+import IDL from "../target/idl/bridge.json";
 import { Bridge } from "../target/types/bridge";
 import {
   AuthorityType,
@@ -34,6 +35,36 @@ describe("bridge", () => {
 
   // Secondary admin
   const newAdmin = Keypair.generate();
+
+  async function getConfirmedTx(sig: string) {
+    for (let i = 0; i < 10; i++) {
+      const tx = await provider.connection.getTransaction(sig, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      });
+      if (tx) return tx;
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    throw new Error(`Transaction ${sig} not found after retries`);
+  }
+
+  const eventCoder = new BorshCoder(IDL as any).events;
+
+  function parseEvents(logMessages: string[]): any[] {
+    const events: any[] = [];
+    for (const log of logMessages) {
+      if (log.startsWith("Program data: ")) {
+        const base64 = log.slice("Program data: ".length);
+        try {
+          const decoded = eventCoder.decode(base64);
+          if (decoded) events.push(decoded);
+        } catch (e) {
+          console.log("decode error:", e);
+        }
+      }
+    }
+    return events;
+  }
 
   before(async () => {
     [bridgeConfigPda] = PublicKey.findProgramAddressSync(
@@ -179,14 +210,7 @@ describe("bridge", () => {
   it("bridge_send — emits TokenSent event with correct fields", async () => {
     const destinationOnOtherChain = Keypair.generate().publicKey;
 
-    const eventPromise = new Promise<any>((resolve) => {
-      const listenerId = program.addEventListener("TokenSent", (event) => {
-        program.removeEventListener(listenerId);
-        resolve(event);
-      });
-    });
-
-    await program.methods
+    const sig = await program.methods
       .bridgeSend(new BN(100_000), destinationOnOtherChain)
       .accounts({
         bridgeConfig: bridgeConfigPda,
@@ -198,7 +222,12 @@ describe("bridge", () => {
       })
       .rpc();
 
-    const event = await eventPromise;
+    const tx = await getConfirmedTx(sig);
+    console.log("=== logMessages ===", JSON.stringify(tx.meta.logMessages, null, 2));
+    const events = parseEvents(tx.meta.logMessages);
+    const event = events.find((e) => e.name === "TokenSent")?.data;
+
+    assert.ok(event, "TokenSent event not found in logs");
     assert.ok(event.mint.equals(mint), "event.mint mismatch");
     assert.equal(event.amount.toNumber(), 100_000, "event.amount mismatch");
     assert.ok(event.to.equals(destinationOnOtherChain), "event.to mismatch");
@@ -209,14 +238,7 @@ describe("bridge", () => {
   it("bridge_receive via authority — emits TokenReceived event", async () => {
     const originOnOtherChain = Keypair.generate().publicKey;
 
-    const eventPromise = new Promise<any>((resolve) => {
-      const listenerId = program.addEventListener("TokenReceived", (event) => {
-        program.removeEventListener(listenerId);
-        resolve(event);
-      });
-    });
-
-    await program.methods
+    const sig = await program.methods
       .bridgeReceive(new BN(50_000), originOnOtherChain)
       .accounts({
         bridgeConfig: bridgeConfigPda,
@@ -229,7 +251,11 @@ describe("bridge", () => {
       })
       .rpc();
 
-    const event = await eventPromise;
+    const tx = await getConfirmedTx(sig);
+    const events = parseEvents(tx.meta.logMessages);
+    const event = events.find((e) => e.name === "TokenReceived")?.data;
+
+    assert.ok(event, "TokenReceived event not found in logs");
     assert.ok(event.mint.equals(mint), "event.mint mismatch");
     assert.equal(event.amount.toNumber(), 50_000, "event.amount mismatch");
   });
