@@ -1,5 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
-import { BN, Program } from "@coral-xyz/anchor";
+import { BN, BorshCoder, Program } from "@coral-xyz/anchor";
+import IDL from "../target/idl/bridge.json";
 import { Bridge } from "../target/types/bridge";
 import {
   AuthorityType,
@@ -47,15 +48,19 @@ describe("bridge", () => {
     throw new Error(`Transaction ${sig} not found after retries`);
   }
 
+  const eventCoder = new BorshCoder(IDL as any).events;
+
   function parseEvents(logMessages: string[]): any[] {
     const events: any[] = [];
     for (const log of logMessages) {
       if (log.startsWith("Program data: ")) {
         const base64 = log.slice("Program data: ".length);
         try {
-          const decoded = program.coder.events.decode(base64);
+          const decoded = eventCoder.decode(base64);
           if (decoded) events.push(decoded);
-        } catch {}
+        } catch (e) {
+          console.log("decode error:", e);
+        }
       }
     }
     return events;
