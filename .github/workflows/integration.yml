@@ -43,6 +43,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    env:
+      CARGO_HOME: /root/.cargo
+      RUSTUP_HOME: /root/.rustup
+      PATH: /root/.avm/bin:/root/.local/share/solana/install/active_release/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
     steps:
       - uses: actions/checkout@v4
 
