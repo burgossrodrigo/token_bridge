@@ -43,6 +43,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    env:
+      CARGO_HOME: /root/.cargo
+      RUSTUP_HOME: /root/.rustup
+      PATH: /root/.avm/bin:/root/.local/share/solana/install/active_release/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +63,9 @@ jobs:
         run: yarn install
 
       - name: Generate throwaway keypair
-        run: solana-keygen new --outfile /root/.config/solana/id.json --no-bip39-passphrase --force
+        run: |
+          mkdir -p $HOME/.config/solana
+          solana-keygen new --outfile $HOME/.config/solana/id.json --no-bip39-passphrase --force
 
       - name: Fix blake3 compatibility
         working-directory: contracts/solana
@@ -71,3 +78,10 @@ jobs:
       - name: Build and test
         working-directory: contracts/solana
         run: anchor test
+
+      - name: Print validator log on failure
+        if: failure()
+        working-directory: contracts/solana
+        run: |
+          echo "=== test-ledger-log.txt ===" && cat .anchor/test-ledger/test-ledger-log.txt 2>/dev/null || true
+          echo "=== validator.log (last 100 lines) ===" && tail -100 .anchor/test-ledger/validator.log 2>/dev/null || true
