@@ -27,10 +27,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
 ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
 
-# Anchor via avm
-RUN cargo install --git https://github.com/coral-xyz/anchor avm --locked --force \
-    && avm install ${ANCHOR_VERSION} \
-    && avm use ${ANCHOR_VERSION}
-ENV PATH="/root/.avm/bin:${PATH}"
+# Anchor CLI (compiled from source to match container glibc)
+RUN cargo install --git https://github.com/coral-xyz/anchor --tag v${ANCHOR_VERSION} anchor-cli --locked
 
 RUN rustc --version && solana --version && anchor --version && node --version
