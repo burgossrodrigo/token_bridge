@@ -25,6 +25,9 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Solana CLI + keypair
 RUN sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)" \
+    && echo "=== PATH ===" && echo "$PATH" \
+    && echo "=== solana bins ===" && find /root/.local/share/solana -name "solana-keygen" 2>/dev/null || true \
+    && find /root -name "solana-keygen" 2>/dev/null || true \
     && /root/.local/share/solana/install/active_release/bin/solana-keygen new \
        --outfile /root/.config/solana/id.json --no-bip39-passphrase
 ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
