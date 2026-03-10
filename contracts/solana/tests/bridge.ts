@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { BN, EventParser, Program } from "@coral-xyz/anchor";
+import { BN, Program } from "@coral-xyz/anchor";
 import { Bridge } from "../target/types/bridge";
 import {
   AuthorityType,
@@ -45,6 +45,20 @@ describe("bridge", () => {
       await new Promise((r) => setTimeout(r, 1000));
     }
     throw new Error(`Transaction ${sig} not found after retries`);
+  }
+
+  function parseEvents(logMessages: string[]): any[] {
+    const events: any[] = [];
+    for (const log of logMessages) {
+      if (log.startsWith("Program data: ")) {
+        const base64 = log.slice("Program data: ".length);
+        try {
+          const decoded = program.coder.events.decode(base64);
+          if (decoded) events.push(decoded);
+        } catch {}
+      }
+    }
+    return events;
   }
 
   before(async () => {
@@ -205,8 +219,8 @@ describe("bridge", () => {
       .rpc();
 
     const tx = await getConfirmedTx(sig);
-    const events: any[] = [];
-    parser.parseLogs(tx.meta.logMessages, (e) => events.push(e));
+    console.log("=== logMessages ===", JSON.stringify(tx.meta.logMessages, null, 2));
+    const events = parseEvents(tx.meta.logMessages);
     const event = events.find((e) => e.name === "TokenSent")?.data;
 
     assert.ok(event, "TokenSent event not found in logs");
@@ -235,8 +249,7 @@ describe("bridge", () => {
       .rpc();
 
     const tx = await getConfirmedTx(sig);
-    const events: any[] = [];
-    parser.parseLogs(tx.meta.logMessages, (e) => events.push(e));
+    const events = parseEvents(tx.meta.logMessages);
     const event = events.find((e) => e.name === "TokenReceived")?.data;
 
     assert.ok(event, "TokenReceived event not found in logs");
