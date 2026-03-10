@@ -23,8 +23,10 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
     --default-toolchain ${RUST_VERSION} -y --no-modify-path
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Solana CLI
-RUN sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
+# Solana CLI + keypair
+RUN sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)" \
+    && /root/.local/share/solana/install/active_release/bin/solana-keygen new \
+       --outfile /root/.config/solana/id.json --no-bip39-passphrase
 ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
 
 # Anchor via avm
@@ -32,9 +34,5 @@ RUN cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
     && avm install ${ANCHOR_VERSION} \
     && avm use ${ANCHOR_VERSION}
 ENV PATH="/root/.avm/bin:${PATH}"
-
-# Generate a throwaway keypair (required by anchor test)
-RUN mkdir -p /root/.config/solana \
-    && solana-keygen new --outfile /root/.config/solana/id.json --no-bip39-passphrase
 
 RUN rustc --version && solana --version && anchor --version && node --version
