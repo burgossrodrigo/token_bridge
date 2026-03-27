@@ -93,29 +93,11 @@ anchor test
 
 ---
 
-## Backend — `backend/`
+## Backend & Signing Infrastructure
 
-A Rust service that replaces Firebase. Listens for events on both chains and executes the receive instruction on the opposite side.
+The relay backend and signing infrastructure are maintained in a private repository.
 
-```
-ETH TokenSent ──► listener/ethereum ──► mpsc ──► worker ──► executor/solana ──► bridge_receive (SOL)
-SOL TokenSent ──► listener/solana   ──► mpsc ──► worker ──► executor/ethereum ──► bridgeReceive (ETH)
-```
-
-- **listener/ethereum** — subscribes to `TokenSent` logs via alloy WebSocket
-- **listener/solana** — subscribes to program logs via `PubsubClient`, parses Anchor events (`Program data: <base64>`)
-- **worker** — persists events to SQLite, executes, retries automatically every `RETRY_INTERVAL_SECS`
-- **executor/ethereum** — calls `bridgeReceive` via alloy
-- **executor/solana** — builds the Anchor instruction manually (discriminator + borsh), signs and submits
-
-### Running with Docker
-
-```bash
-docker build -t bridge-backend ./backend
-docker run -d --env-file backend/.env -v bridge-data:/data bridge-backend
-```
-
-Copy `backend/.env.example` to `backend/.env` and fill in the required variables.
+See [burgossrodrigo/token-bridge-signer](https://github.com/burgossrodrigo/token-bridge-signer).
 
 ---
 
@@ -149,9 +131,4 @@ anchor test
 
 ### Backend
 
-```bash
-cp backend/.env.example backend/.env
-# fill in the required values
-cd backend
-cargo run
-```
+See [burgossrodrigo/token-bridge-signer](https://github.com/burgossrodrigo/token-bridge-signer).
