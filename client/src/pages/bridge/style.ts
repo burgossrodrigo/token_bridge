@@ -7,13 +7,15 @@ export const PageWrapper = styled.div`
   align-items: center;
   min-height: 100vh;
   background: ${theme.bg};
+  padding: 0 16px 64px;
 `
 
 export const Main = styled.main`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  padding: 40px 16px 64px;
+  max-width: 480px;
+  padding-top: 24px;
 `

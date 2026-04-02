@@ -12,32 +12,33 @@ export const SelectorButton = styled.button`
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background: ${theme.bg};
-  border: 1px solid ${theme.border};
-  border-radius: 8px;
-  color: ${theme.text};
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #fff;
   font-size: 14px;
   cursor: pointer;
   transition: border-color 0.15s;
 
   &:hover {
-    border-color: ${theme.primary};
+    border-color: rgba(255, 255, 255, 0.4);
   }
 `
 
 export const TokenSymbol = styled.span`
-  font-weight: 600;
+  font-weight: 700;
+  color: #fff;
 `
 
 export const TokenName = styled.span`
   font-size: 12px;
-  color: ${theme.textMuted};
+  color: rgba(255, 255, 255, 0.6);
   margin-left: 8px;
 `
 
 export const Chevron = styled.span<{ $open: boolean }>`
   font-size: 10px;
-  color: ${theme.textMuted};
+  color: rgba(255, 255, 255, 0.5);
   transition: transform 0.15s;
   transform: ${({ $open }) => ($open ? 'rotate(180deg)' : 'rotate(0deg)')};
 `
@@ -47,12 +48,12 @@ export const Dropdown = styled.div`
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: ${theme.surface};
+  background: ${theme.surfaceElevated};
   border: 1px solid ${theme.border};
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   z-index: 50;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 `
 
 export const DropdownItem = styled.button<{ $active: boolean }>`
@@ -61,7 +62,7 @@ export const DropdownItem = styled.button<{ $active: boolean }>`
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: ${({ $active }) => ($active ? 'rgba(153, 69, 255, 0.12)' : 'transparent')};
+  background: ${({ $active }) => ($active ? `${theme.purple}20` : 'transparent')};
   border: none;
   color: ${theme.text};
   font-size: 14px;
@@ -70,6 +71,6 @@ export const DropdownItem = styled.button<{ $active: boolean }>`
   transition: background 0.1s;
 
   &:hover {
-    background: rgba(153, 69, 255, 0.08);
+    background: ${theme.purple}15;
   }
 `

@@ -5,7 +5,11 @@ import {
   StatusTitle,
   TxList,
   TxRow,
+  TxIcon,
+  TxInfo,
   TxDirection,
+  TxSubtext,
+  TxRight,
   TxAmount,
   TxHash,
   StatusBadge,
@@ -21,10 +25,6 @@ function shortHash(hash: string): string {
   return `${hash.slice(0, 6)}…${hash.slice(-4)}`
 }
 
-function directionLabel(dir: TxRecord['direction']): string {
-  return dir === 'eth_to_sol' ? 'ETH → SOL' : 'SOL → ETH'
-}
-
 export function TxStatus({ transactions }: Props) {
   return (
     <StatusRoot>
@@ -36,22 +36,32 @@ export function TxStatus({ transactions }: Props) {
         <TxList>
           {transactions.map((tx) => (
             <TxRow key={tx.id}>
-              <TxDirection>{directionLabel(tx.direction)}</TxDirection>
-              <TxAmount>
-                {tx.amount} {tx.token.symbol}
-              </TxAmount>
-              <TxHash
-                href={
-                  tx.direction === 'eth_to_sol'
-                    ? `https://sepolia.etherscan.io/tx/${tx.hash}`
-                    : `https://solscan.io/tx/${tx.hash}?cluster=devnet`
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                {shortHash(tx.hash)}
-              </TxHash>
-              <StatusBadge $status={tx.status}>{tx.status}</StatusBadge>
+              <TxIcon $direction={tx.direction}>
+                {tx.direction === 'eth_to_sol' ? '→' : '←'}
+              </TxIcon>
+              <TxInfo>
+                <TxDirection>
+                  {tx.direction === 'eth_to_sol' ? 'Ethereum → Solana' : 'Solana → Ethereum'}
+                </TxDirection>
+                <TxSubtext>{shortHash(tx.from)}</TxSubtext>
+              </TxInfo>
+              <TxRight>
+                <TxAmount>
+                  {tx.amount} {tx.token.symbol}
+                </TxAmount>
+                <StatusBadge $status={tx.status}>{tx.status}</StatusBadge>
+                <TxHash
+                  href={
+                    tx.direction === 'eth_to_sol'
+                      ? `https://sepolia.etherscan.io/tx/${tx.hash}`
+                      : `https://solscan.io/tx/${tx.hash}?cluster=devnet`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {shortHash(tx.hash)}
+                </TxHash>
+              </TxRight>
             </TxRow>
           ))}
         </TxList>

@@ -6,10 +6,17 @@ import { TokenSelector } from '../token_selector'
 import type { useBridge } from '../../hooks/useBridge'
 import {
   CardRoot,
-  CardTitle,
-  DirectionToggle,
-  ChainLabel,
-  SwapIcon,
+  BalanceSection,
+  BalanceLabel,
+  BalanceAmount,
+  AccentBars,
+  AccentBar,
+  AccentBarTrack,
+  AssetCard,
+  AssetCardHeader,
+  AssetCardTitle,
+  AssetCardActions,
+  AssetCardBtn,
   FieldGroup,
   FieldLabel,
   AmountInput,
@@ -21,10 +28,9 @@ import {
   BridgeButton,
   ErrorMessage,
 } from './style'
+import { theme } from '../../styles/theme'
 
 type BridgeState = ReturnType<typeof useBridge>
-
-interface Props extends BridgeState {}
 
 function shortAddr(addr: string): string {
   if (addr.length <= 16) return addr
@@ -32,8 +38,6 @@ function shortAddr(addr: string): string {
 }
 
 export function BridgeCard({
-  direction,
-  toggleDirection,
   selectedToken,
   setSelectedToken,
   amount,
@@ -42,82 +46,76 @@ export function BridgeCard({
   error,
   canBridge,
   bridge,
-}: Props) {
+}: BridgeState) {
   const { address: ethAddress } = useAccount()
   const { publicKey: solPubkey } = useWallet()
 
-  const isEthToSol = direction === 'eth_to_sol'
-
-  const fromAddr = isEthToSol ? ethAddress : solPubkey?.toBase58()
-  const toAddr = isEthToSol ? solPubkey?.toBase58() : ethAddress
-
   return (
     <CardRoot>
-      <CardTitle>Bridge Tokens</CardTitle>
+      <BalanceSection>
+        <BalanceLabel>Bridge Amount</BalanceLabel>
+        <BalanceAmount>{amount ? `${amount} ${selectedToken?.symbol ?? ''}` : '0.00'}</BalanceAmount>
+        <AccentBars>
+          <AccentBar $color={theme.teal} $flex={3} />
+          <AccentBar $color={theme.purple} $flex={2} />
+          <AccentBar $color={theme.pink} $flex={1} />
+          <AccentBarTrack />
+        </AccentBars>
+      </BalanceSection>
 
-      {/* Direction toggle */}
-      <DirectionToggle onClick={toggleDirection} title="Click to swap direction">
-        <ChainLabel $chain="eth">Ethereum</ChainLabel>
-        <SwapIcon>{isEthToSol ? '→' : '←'}</SwapIcon>
-        <ChainLabel $chain="sol">Solana</ChainLabel>
-      </DirectionToggle>
+      <AssetCard>
+        <AssetCardHeader>
+          <AssetCardTitle>Token & Amount</AssetCardTitle>
+          <AssetCardActions>
+            <AssetCardBtn title="Add token">+</AssetCardBtn>
+            <AssetCardBtn title="More">•••</AssetCardBtn>
+          </AssetCardActions>
+        </AssetCardHeader>
 
-      {/* Token selector */}
-      <FieldGroup>
-        <FieldLabel>Token</FieldLabel>
-        <TokenSelector
-          tokens={TOKENS}
-          selected={selectedToken}
-          onChange={setSelectedToken}
-        />
-      </FieldGroup>
+        <FieldGroup>
+          <FieldLabel>Token</FieldLabel>
+          <TokenSelector
+            tokens={TOKENS}
+            selected={selectedToken}
+            onChange={setSelectedToken}
+          />
+        </FieldGroup>
 
-      {/* Amount */}
-      <FieldGroup>
-        <FieldLabel>Amount</FieldLabel>
-        <AmountInput
-          type="number"
-          placeholder="0.00"
-          value={amount}
-          min="0"
-          step="any"
-          onChange={(e) => setAmount(e.target.value)}
-        />
-      </FieldGroup>
+        <FieldGroup>
+          <FieldLabel>Amount</FieldLabel>
+          <AmountInput
+            type="number"
+            placeholder="0.00"
+            value={amount}
+            min="0"
+            step="any"
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </FieldGroup>
+      </AssetCard>
 
-      {/* Addresses */}
       <AddressRow>
         <AddressLine>
           <AddrKey>From</AddrKey>
-          {fromAddr ? (
-            <AddrValue title={fromAddr}>{shortAddr(fromAddr)}</AddrValue>
+          {ethAddress ? (
+            <AddrValue title={ethAddress}>{shortAddr(ethAddress)}</AddrValue>
           ) : (
-            <NotConnectedHint>
-              {isEthToSol ? 'Connect ETH wallet' : 'Connect SOL wallet'}
-            </NotConnectedHint>
+            <NotConnectedHint>Connect ETH wallet</NotConnectedHint>
           )}
         </AddressLine>
         <AddressLine>
           <AddrKey>To</AddrKey>
-          {toAddr ? (
-            <AddrValue title={toAddr}>{shortAddr(toAddr)}</AddrValue>
+          {solPubkey ? (
+            <AddrValue title={solPubkey.toBase58()}>{shortAddr(solPubkey.toBase58())}</AddrValue>
           ) : (
-            <NotConnectedHint>
-              {isEthToSol ? 'Connect SOL wallet' : 'Connect ETH wallet'}
-            </NotConnectedHint>
+            <NotConnectedHint>Connect SOL wallet</NotConnectedHint>
           )}
         </AddressLine>
       </AddressRow>
 
-      {/* Error */}
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
-      {/* Submit */}
-      <BridgeButton
-        onClick={bridge}
-        disabled={!canBridge}
-        $loading={loading}
-      >
+      <BridgeButton onClick={bridge} disabled={!canBridge} $loading={loading}>
         {loading ? 'Bridging…' : 'Bridge Now'}
       </BridgeButton>
     </CardRoot>

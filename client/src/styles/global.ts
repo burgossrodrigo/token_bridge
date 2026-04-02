@@ -17,17 +17,16 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Override Solana wallet adapter button to fit our header */
   .wallet-adapter-button {
     height: 36px !important;
     font-size: 13px !important;
     border-radius: 8px !important;
     padding: 0 16px !important;
-    background: ${theme.primary} !important;
+    background: ${theme.purple} !important;
   }
 
   .wallet-adapter-button:hover {
-    background: ${theme.primaryHover} !important;
+    background: #6a4de0 !important;
   }
 
   .wallet-adapter-modal-wrapper {

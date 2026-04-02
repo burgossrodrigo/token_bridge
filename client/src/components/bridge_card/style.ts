@@ -6,92 +6,136 @@ export const CardRoot = styled.div`
   max-width: 480px;
   background: ${theme.surface};
   border: 1px solid ${theme.border};
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 `
 
-export const CardTitle = styled.h2`
-  font-size: 18px;
-  font-weight: 700;
-  color: ${theme.text};
+export const BalanceSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `
 
-export const DirectionToggle = styled.button`
-  width: 100%;
+export const BalanceLabel = styled.span`
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: ${theme.textMuted};
+  text-transform: uppercase;
+`
+
+export const BalanceAmount = styled.div`
+  font-size: 32px;
+  font-weight: 700;
+  color: ${theme.text};
+  letter-spacing: -0.5px;
+`
+
+export const AccentBars = styled.div`
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 2px;
+`
+
+export const AccentBar = styled.div<{ $color: string; $flex: number }>`
+  height: 4px;
+  border-radius: 2px;
+  background: ${({ $color }) => $color};
+  flex: ${({ $flex }) => $flex};
+`
+
+export const AccentBarTrack = styled.div`
+  flex: 2;
+  height: 4px;
+  border-radius: 2px;
+  background: ${theme.border};
+`
+
+export const AssetCard = styled.div`
+  border-radius: 16px;
+  background: ${theme.gradient};
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`
+
+export const AssetCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
+
+export const AssetCardTitle = styled.span`
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+`
+
+export const AssetCardActions = styled.div`
+  display: flex;
+  gap: 6px;
+`
+
+export const AssetCardBtn = styled.button`
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 12px;
-  background: ${theme.bg};
-  border: 1px solid ${theme.border};
-  border-radius: 10px;
-  color: ${theme.text};
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
 
   &:hover {
-    border-color: ${theme.primary};
-    background: rgba(153, 69, 255, 0.06);
+    background: rgba(255, 255, 255, 0.25);
   }
-`
-
-export const ChainLabel = styled.span<{ $chain: 'eth' | 'sol' }>`
-  padding: 3px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  background: ${({ $chain }) =>
-    $chain === 'eth' ? 'rgba(98, 126, 234, 0.15)' : 'rgba(153, 69, 255, 0.15)'};
-  color: ${({ $chain }) => ($chain === 'eth' ? '#627eea' : theme.primary)};
-`
-
-export const SwapIcon = styled.span`
-  color: ${theme.textMuted};
-  font-size: 16px;
 `
 
 export const FieldGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 `
 
 export const FieldLabel = styled.label`
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: ${theme.textMuted};
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 `
 
 export const AmountInput = styled.input`
   width: 100%;
   padding: 10px 14px;
-  background: ${theme.bg};
-  border: 1px solid ${theme.border};
-  border-radius: 8px;
-  color: ${theme.text};
-  font-size: 18px;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
   outline: none;
   transition: border-color 0.15s;
 
   &::placeholder {
-    color: ${theme.textMuted};
+    color: rgba(255, 255, 255, 0.35);
     font-weight: 400;
   }
 
   &:focus {
-    border-color: ${theme.primary};
+    border-color: rgba(255, 255, 255, 0.5);
   }
 
-  /* Hide number spinners */
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -104,8 +148,8 @@ export const AddressRow = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px 14px;
-  background: ${theme.bg};
+  padding: 10px 12px;
+  background: ${theme.surfaceElevated};
   border: 1px solid ${theme.border};
   border-radius: 10px;
 `
@@ -121,6 +165,9 @@ export const AddressLine = styled.div`
 export const AddrKey = styled.span`
   color: ${theme.textMuted};
   min-width: 36px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 `
 
 export const AddrValue = styled.span`
@@ -131,12 +178,12 @@ export const AddrValue = styled.span`
   white-space: nowrap;
   flex: 1;
   text-align: right;
+  font-size: 12px;
 `
 
 export const NotConnectedHint = styled.span`
-  font-family: monospace;
-  color: ${theme.textMuted};
   font-size: 11px;
+  color: ${theme.textMuted};
   text-align: right;
   flex: 1;
 `
@@ -144,23 +191,22 @@ export const NotConnectedHint = styled.span`
 export const BridgeButton = styled.button<{ $loading: boolean }>`
   width: 100%;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   cursor: ${({ $loading }) => ($loading ? 'not-allowed' : 'pointer')};
-  background: ${({ $loading }) =>
-    $loading ? theme.border : theme.gradient};
+  background: ${({ $loading }) => ($loading ? theme.border : theme.gradientTeal)};
   color: ${({ $loading }) => ($loading ? theme.textMuted : '#fff')};
   transition: opacity 0.15s;
   letter-spacing: 0.02em;
 
   &:hover:not(:disabled) {
-    opacity: 0.9;
+    opacity: 0.88;
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
   }
 `
